@@ -86,7 +86,7 @@ $MyReportDetails = New-Object 'System.Collections.Generic.List[System.Object]'
 
     $MyDatas.Results."$MyProd".Controls | ForEach-Object {
         $MyDetails = $_
-        Write-Output "Dealing With $($MyDetails."Control ID")"
+        Write-Verbose "Dealing With $($MyDetails."Control ID")"
         $Obj2 = [PSCustomObject]@{
             "ControlID"        = [String]($MyDetails."Control ID")
             "Criticality"    = [String]($MyDetails.Criticality)
@@ -120,7 +120,7 @@ $AuditorCompany = "iFrenchies"
 $AuditorLogo = "$SourcesPath\logo$AuditorCompany.png"
 $AuditorURL = "https://www.ifrenchies.eu"
 
-$ToolName = $MyReportsHistory | Select-Object Tool -First 1
+$ToolName = ($MyReportsHistory | Select-Object -First 1).Tool
 $TooLogo = "$SourcesPath\logo$ToolName.png"
 $ToolUrl = "https://www.tool.url"
 
@@ -132,9 +132,9 @@ $HeaderColor1 = "Blue"
 $HeaderColor2 = "Yellow"
 
 
-$ClientName = $MyReportsHistory | Select-Object DisplayName -First 1
-$FQDN = $MyReportsHistory | Select-Object DomainName -First 1
-$FQDNId = $MyReportsHistory | Select-Object TenantId -First 1
+$ClientName = ($MyReportsHistory | Select-Object -First 1).DisplayName
+$FQDN = ($MyReportsHistory | Select-Object -First 1).DomainName
+$FQDNId =($MyReportsHistory | Select-Object -First 1).TenantId
 $ClientLogo = "$SourcesPath\logo$ClientName.png"
 $ClientContact = "Kevin Coupé"
 $ClientPhone = "+33 123456789"
