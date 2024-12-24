@@ -183,7 +183,7 @@ New-HTML -TitleText "$ClientName - Scuba Gear Analysis of $FQDN" -Author "$Consu
             New-HTMLColumn -Width 33% {
                 New-HTMLImage -Source "$ClientLogo" -Width "320" -Inline
                 New-HTMLFontIcon -IconSolid address-book
-                New-HTMLHeading h2 -HeadingText "$($ClientName.ToUpper())"
+                New-HTMLHeading h2 -HeadingText  "$($ClientName.ToUpper())"
                 New-HTMLFontIcon -IconSolid address-card
                 New-HTMLText -Text "$ClientContact"
                 New-HTMLFontIcon -IconSolid phone
