@@ -12,9 +12,14 @@ An example
 General notes
 #>
 
+
 $MyScriptName = [String]([System.IO.Path]::GetFileNameWithoutExtension($MyInvocation.MyCommand.Path))
-$TempFolder = "ScubaGear"
-$datafolder = (New-Item "$PSScriptRoot\..\_Tmp" -Name "$TempFolder" -ItemType Directory -Force | Out-Null).FullName
+
+$ToolName = "ScubaGear"
+$ClientName = "cultura"
+
+$datafolder = (New-Item "$PSScriptRoot\..\_Tmp" -Name "$ToolName" -ItemType Directory -Force | Out-Null).FullName
+
 
 
 $NeededModules = @("ScubaGear")
@@ -25,15 +30,15 @@ $NeededModules | ForEach-Object {
 }
 Initialize-SCuBA
 
-$TimeStamp = Get-Date -Format "yyyyMMdd"
+$DateStamp = Get-Date -Format "yyyyMMdd"
 Invoke-SCuBA -ProductNames * `
 -LogIn $true  `
 -DisconnectOnExit  `
 -OutFolderName "ScubaGear" `
 -OutPath "$datafolder" `
--OutJsonFileName "cultura-$TimeStamp" `
--OutReportName "cultura-$TimeStamp" `
--OutRegoFileName "cultura" `
+-OutJsonFileName "$ClientName-$DateStamp" `
+-OutReportName "$ClientName-$DateStamp" `
+-OutRegoFileName "$ClientName" `
 -MergeJson `
 -Quiet
 #-OPAPath "C:\Users\admin-sgiraud-t0\.scubagear\Tools" `
