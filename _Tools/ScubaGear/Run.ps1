@@ -46,3 +46,5 @@ Invoke-SCuBA -ProductNames * `
 -Quiet
 #-OPAPath "C:\Users\admin-sgiraud-t0\.scubagear\Tools" `
 
+#Compress Files... and copy to Export?
+

@@ -4,7 +4,7 @@
 
 Import-Module Microsoft.Graph.Security
 
-Connect-MgGraph -Scopes SecurityEvents.Read.All
+Connect-MgGraph -Scopes SecurityEvents.Read.All -NoWelcome
 
 $SecurityScores = Get-MgSecuritySecureScore -Property *
 
@@ -12,6 +12,7 @@ $MySecurityScore = $SecurityScores  | Select-Object -Last 1
 
 $MySecurityScore | fl
 
+<#
 ActiveUserCount
 AverageComparativeScores
 AzureTenantId
@@ -37,13 +38,14 @@ AdditionalProperties
     "controlScores": [{"@odata.type": "microsoft.graph.controlScore"}],
     "vendorInformation": {"@odata.type": "microsoft.graph.securityVendorInformation"},
     }
-
+#>
 $SecurityScoreControlProfiles = Get-MgSecuritySecureScoreControlProfile -Property *
 
 $MySecurityScoreControlProfile = $SecurityScoreControlProfiles | Select-Object -First 1
 
 $MySecurityScoreControlProfile | fl
 
+<#
 
 ActionType
 ActionUrl
@@ -89,3 +91,5 @@ AdditionalProperties
     "userImpact": "String",
     "vendorInformation": {"@odata.type": "microsoft.graph.securityVendorInformation"}
   }
+
+#>

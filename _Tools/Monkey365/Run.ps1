@@ -22,7 +22,7 @@ General notes
 #https://github.com/silverhack/monkey365/archive/refs/heads/main.zip
 
 #Unblock Module
-Get-ChildItem -Recurse c:\monkey365 | Unblock-File
+Get-ChildItem -Recurse C:\_Cultura\_Tools\monkey365 | Unblock-File
 
 #Import Module
 Import-Module C:\_Cultura\_Tools\monkey365 -Force
@@ -58,18 +58,21 @@ $param = @{
 $assets = Invoke-Monkey365 @param
 #>
 
+Import-Module C:\_Cultura\_Tools\monkey365 -Force
 
+$DateStamp = Get-Date -Format "yyyyMMdd"
 
 $param = @{
     Instance = 'Azure';
     Analysis = 'All';
     PromptBehavior = 'SelectAccount';
-    ExportTo = @("CLIXML","CSV","JSON","HTML");
+    ExportTo = @("PRINT","JSON","HTML");
     Subscriptions = 'e0a33254-35e0-498f-a858-114a6df2d886'; #Techniques Infrastructures
-    TenantID = '37ddb62e-1d49-42b1-aacc-e08f83d1253d'; #Cultura
+    TenantID = '37ddb62e-1d49-42b1-aacc-e08f83d1253d' #Cultura
+    #SaveProject = "C:\_Cultura\_Tmp\Monkey365-$DateStamp"
 }
 
-$assets = Invoke-Monkey365 @param
+$myAzMonkey = Invoke-Monkey365 @param
 
 $param = @{
     ClientId = '00000000-0000-0000-0000-000000000000';
@@ -79,24 +82,30 @@ $param = @{
     Analysis = 'SharePointOnline';
     Subscriptions = '00000000-0000-0000-0000-000000000000';
     TenantID = '00000000-0000-0000-0000-000000000000';
-    ExportTo = @("CLIXML","CSV","JSON","HTML");
+    ExportTo = @("JSON","HTML");
+
 }
 
 
 
-$param = @{
+
+
+$params = @{
     Instance = 'Microsoft365';
     IncludeEntraID = $true;
 #    DeviceCode = $true
     TenantID = '37ddb62e-1d49-42b1-aacc-e08f83d1253d'; #Cultura
     Analysis = "ExchangeOnline","SharePointOnline","Purview","MicrosoftTeams","Microsoft365";
-    ExportTo = @("JSON","HTML");
+    ExportTo = @("PRINT","JSON","HTML");
     Threads = 4;
+    #SaveProject = 'C:\_Cultura\_Tmp\Monkey365';
+    Compress = $true
 }
 
 
-$myMonkey365 = Invoke-Monkey365 @param
+$myMS365Monkey = Invoke-Monkey365 @params
 
+<#
 #TenantID = '00000000-0000-0000-00-000000000000';
 #37ddb ----- 1253d # 2 autres?? cheops et claranet?
 
@@ -108,6 +117,7 @@ $myMonkey365 = Invoke-Monkey365 @param
 -ForceMSALDesktop
 
 -AllSubscriptions $true ### !!! attention au role necessaire sur toutes !!!
+#>
 
 
 

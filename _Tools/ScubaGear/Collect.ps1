@@ -27,7 +27,7 @@ param (
     [string]$Folder = (Get-Location).Path
 )
 
-$AppName = "Scuba"
+$AppName = "ScubaGear"
 $TimeStamp = "$((Get-Date).ToString("yyyyMMddTHHmmss"))"
 try {
     "$TimeStamp : Launch $Search, $Depth, $ZipName,$Folder" | Out-File "$Folder\..\_Logs\$AppName-Collect.log" -Encoding utf8 -Force
