@@ -11,8 +11,13 @@ An example
 .NOTES
 General notes
 #>
+Param(
+    [Parameter(Mandatory=$false, Position=0)]
+    [ValidateRange(0, [int]::MaxValue)]
+    [Int] $Last = 0
+)
 
-$filepath = "C:\Users\s.giraud-ext\Cultura\Team Infra Microsoft - Documents\Audit\Infos\Scuba_2024_12_13_10_39_57"
+$filepath = "C:\_Cultura\_Tmp"
 
 #$MyCMDB =  Get-Content ".\$ScubaGear.json" | ConvertFrom-Json
 
@@ -21,7 +26,11 @@ $MyReportsCounts = New-Object 'System.Collections.Generic.List[System.Object]'
 $MyReportsGroups = New-Object 'System.Collections.Generic.List[System.Object]'
 $MyReportsDetails = New-Object 'System.Collections.Generic.List[System.Object]'
 
-$MyJsonFiles = Get-ChildItem -Path $filepath -File -Filter "*.json" 
+$MyJsonFiles = Get-ChildItem -Path $filepath -File -Filter "cultura*.json" -Recurse
+
+
+$MyDataFolders = ( Get-ChildItem -Path $filepath -File -Filter "cultura*.json" -Recurse).Directory.FullName | Select-Object -Unique
+
 
 $MyDatas = Get-Content -Raw ($MyJsonFiles | Where-Object Name -like "cultura-*.json").FullName | ConvertFrom-Json
 $MyResults = Get-Content -Raw ($MyJsonFiles | Where-Object Name -eq "cultura.json").FullName | ConvertFrom-Json
@@ -35,7 +44,7 @@ $MyDatas.MetaData.ProductsAssessed | ForEach-Object { $MyProducts | Add-Member -
 
 
 $MyReportCounts = [PSCustomObject]@{
-    "Date"   = [datetime]$($MyDatas.MetaData.TimestampZulu)
+    "Date"   = [String]([datetime]$($MyDatas.MetaData.TimestampZulu)).ToString("yyyyMMdd")
 }
 
 ($MyDatas.Summary | Get-Member -MemberType NoteProperty).Name | ForEach-Object {
@@ -58,14 +67,17 @@ $MyReportInfos = [PSCustomObject]@{
     "DomainName"   = [string]$($MyDatas.MetaData.DomainName)
     "Tool"   = [string]$($MyDatas.MetaData.Tool)
     "ToolVersion"   = [string]$($MyDatas.MetaData.ToolVersion)
-    "Date"   = [datetime]$($MyDatas.MetaData.TimestampZulu)
+    "Date"   = [String]([datetime]$($MyDatas.MetaData.TimestampZulu)).ToString("yyyyMMdd") #[datetime]$($MyDatas.MetaData.TimestampZulu)
+    
+
 }
 
 #AddToHistory?
 $MyReportsHistory.Add($MyReportInfos)
 
 $MyGroupInfos = New-Object 'System.Collections.Generic.List[System.Object]'
-$MyReportDetails = New-Object 'System.Collections.Generic.List[System.Object]'
+#$MyReportFullDetails = New-Object 'System.Collections.Generic.List[System.Object]'
+$MyReportsDetails = New-Object 'System.Collections.Generic.List[System.Object]'
 
 ($MyDatas.Summary | Get-Member -MemberType NoteProperty).Name | ForEach-Object { 
     $MyProd = [String]($_)
@@ -77,7 +89,7 @@ $MyReportDetails = New-Object 'System.Collections.Generic.List[System.Object]'
             "GroupName" = [String]($Mygroup.GroupName)
             "GroupNumber" = [String]($Mygroup.GroupNumber)
             "GroupReferenceURL" = [String]($Mygroup.GroupReferenceURL)
-            "Date" = [datetime]$($MyDatas.MetaData.TimestampZulu)
+            "Date" = [String]([datetime]$($MyDatas.MetaData.TimestampZulu)).ToString("yyyyMMdd")  #[datetime]$($MyDatas.MetaData.TimestampZulu)
         }
         $MyGroupInfos.Add($Obj)
     }
@@ -99,48 +111,60 @@ $MyReportDetails = New-Object 'System.Collections.Generic.List[System.Object]'
 
         $Obj2 | Add-Member -MemberType NoteProperty -Name "Category" -Value "$([String]($MyProducts."$MyProd"))"
         $Obj2 | Add-Member -MemberType NoteProperty -Name "Model" -Value "$([String]($Obj.GroupName))"
-        $Obj2 | Add-Member -MemberType NoteProperty -Name "Tool" -Value "$([String]$($MyDatas.MetaData.Tool)))"
-        $Obj2 | Add-Member -MemberType NoteProperty -Name "Date" -Value "$([datetime]$($MyDatas.MetaData.TimestampZulu))"
+        $Obj2 | Add-Member -MemberType NoteProperty -Name "Tool" -Value "$([String]$($MyDatas.MetaData.Tool))"
+        $Obj2 | Add-Member -MemberType NoteProperty -Name "Date" -Value "$([String]([datetime]$($MyDatas.MetaData.TimestampZulu)).ToString("yyyyMMdd"))" #"$([datetime]$($MyDatas.MetaData.TimestampZulu))"
 
-        $MyReportDetails.Add($Obj2)
+        $MyReportsDetails.Add($Obj2)
     }
-
 }
 
-    #AddToHistory?
-    $MyReportsDetails.Add($MyReportDetails)
+#AddToHistory?
+#$MyReportsFullDetails.Add($MyReportDetails)
+
+
+$NbReportselected = [Int]($MyReportsHistory.Count)
+If ($Last) {$NbReportselected = $Last}
+
 
 
 $TSDate = [String]([datetime]$($MyDatas.MetaData.TimestampZulu)).ToString("yyyyMMdd")
 
 
-$SourcesPath = "$PSScriptRoot\..\_Sources"
+$SourcesPath = "$PSScriptRoot"
+$ReportPath = "$SourcesPath\_Reports"
+#Start Auditor informations
 $AuditorColor = "Blue"
 $AuditorCompany = "iFrenchies"
-$AuditorLogo = "$SourcesPath\logo$AuditorCompany.png"
+$AuditorLogo = "$SourcesPath\images\logo$AuditorCompany.png"
 $AuditorURL = "https://www.ifrenchies.eu"
 
-$ToolName = ($MyReportsHistory | Select-Object -First 1).Tool
-$TooLogo = "$SourcesPath\logo$ToolName.png"
-$ToolUrl = "https://www.tool.url"
-
 $ConsultantName = "Stephane Giraud"
-$ConsultantPhone = "+33 695985004"
+$ConsultantPhone = "+33695985004"
 $ConsultantMail = "sgiraud@ifrenchies.eu"
 
-$HeaderColor1 = "Blue"
-$HeaderColor2 = "Yellow"
+$ToolName = ($MyReportsHistory | Select-Object -First 1).Tool
+#Adaptation ToolName
 
 
+$TooLogo = "$SourcesPath\images\$ToolName.png"
+$ToolUrl = "https://cisagov.github.io/ScubaGear/"
+
+#Start Client Info
 $ClientName = ($MyReportsHistory | Select-Object -First 1).DisplayName
 $FQDN = ($MyReportsHistory | Select-Object -First 1).DomainName
-$FQDNId =($MyReportsHistory | Select-Object -First 1).TenantId
-$ClientLogo = "$SourcesPath\logo$ClientName.png"
+$FQDNId = ($MyReportsHistory | Select-Object -First 1).Tenant
+$ClientLogo = "$SourcesPath\images\logo$ClientName.png"
 $ClientContact = "Kevin Coupé"
-$ClientPhone = "+33 123456789"
+$ClientPhone = "+33123456789"
 $ClientMail = "kcoupe-ext@cultura.fr"
+#End Client Info
 
-$HTMLReportFile = ".\Scubagear-Cultura.html"
+#Start Report infos
+$HeaderColor1 = "Yellow"
+$HeaderColor2 = "Blue"
+$HTMLReportFile = "$ReportPath\$ToolName-$ClientName.html"
+#End Report infos
+
 
 $MyFQDNDomain = $FQDN
 $ReportsDate = @()
@@ -157,9 +181,10 @@ New-HTML -TitleText "$ClientName - Scuba Gear Analysis of $FQDN" -Author "$Consu
     New-HTMLTabStyle  -Transition -LinearGradient -SelectorColor Blue -SelectorColorTarget AliceBlue -FontSize 15 -SlimTabs
     New-HTMLTab -Name "Synthesis" -IconBrands hubspot -IconColor Blue {
 
+
         New-HTMLContent -HeaderText 'Informations' -HeaderTextSize 22 -HeaderTextColor $HeaderColor1 -HeaderTextAlignment center -HeaderBackGroundColor $HeaderColor2 {
             New-HTMLColumn -Width 33% {
-                New-HTMLImage -Source "$AuditorLogo" -Width "320" -Inline -UrlLink "$AuditorURL" -Target _blank
+                New-HTMLImage -Source "$AuditorLogo" -Height "160" -Inline -UrlLink "$AuditorURL" -Target _blank
                 New-HTMLFontIcon -IconSolid address-book
                 New-HTMLHeading h2 -HeadingText "$($AuditorCompany.ToUpper())"
                 New-HTMLFontIcon -IconSolid address-card 
@@ -171,19 +196,19 @@ New-HTML -TitleText "$ClientName - Scuba Gear Analysis of $FQDN" -Author "$Consu
             } -AlignContentText center
     
             New-HTMLColumn -Width 33% {
-                New-HTMLText  -Text "$FQDN ($FQDNId)" -Color $HeaderColor1 -FontVariant small-caps -FontWeight bold -FontSize 42
-                New-HTMLFontIcon -IconSolid info-circle -IconSize 22
-                New-HTMLText  -Text "$NbReports Report(s)" -Color $HeaderColor1 -FontSize 22 -Alignment center
-                New-HTMLFontIcon -IconSolid calendar-week -IconSize 22
-                New-HTMLText  -Text "From $($ReportsDate[0]) To $($ReportsDate[$NbPCReports-1])" -Color $HeaderColor1 -FontSize 22 -Alignment center
+                New-HTMLText  -Text "$FQDN" -Color $HeaderColor2 -FontVariant small-caps -FontWeight bold -FontSize 42
+                New-HTMLFontIcon -IconSolid info-circle -IconSize 20
+                New-HTMLText  -Text "$NbReports Report(s) Available" -Color $HeaderColor2 -FontSize 20 -Alignment center
+                New-HTMLFontIcon -IconSolid calendar-week -IconSize 20
+                New-HTMLText  -Text "Synthesis From $($ReportsDate[0]) To $($ReportsDate[$NbReportselected -1])" -Color $HeaderColor2 -FontSize 20 -Alignment center
                 New-HTMLImage -Source "$TooLogo" -Width "160" -Inline -UrlLink "$ToolURL" -Target _blank
     
             } -AlignContentText center
             
             New-HTMLColumn -Width 33% {
-                New-HTMLImage -Source "$ClientLogo" -Width "320" -Inline
+                New-HTMLImage -Source "$ClientLogo" -Height "160" -Inline
                 New-HTMLFontIcon -IconSolid address-book
-                New-HTMLHeading h2 -HeadingText  "$($ClientName.ToUpper())"
+                New-HTMLHeading h2 -HeadingText "$($ClientName.ToUpper())"
                 New-HTMLFontIcon -IconSolid address-card
                 New-HTMLText -Text "$ClientContact"
                 New-HTMLFontIcon -IconSolid phone
@@ -194,11 +219,45 @@ New-HTML -TitleText "$ClientName - Scuba Gear Analysis of $FQDN" -Author "$Consu
         }
 
     }
-
-    New-HTMLTab -Name "$Date" { #-IconBrands acquisitions-incorporated -IconColor Yellow {
-
+    $ReportsDate | Select-Object -First $NbReportselected |  ForEach-Object {
+        $MyDate = [String]$_
+        New-HTMLTab -Name "$MyDate" { #-IconBrands acquisitions-incorporated -IconColor Yellow {
+            $HTMLReportInfos =  $MyReportsHistory | Where-Object Date -eq "$MyDate"
+            $HTMLReportDetails = $MyReportsDetails | Where-Object Date -eq "$MyDate"
+            $HTMLReportCounts = $MyReportsCounts | Where-Object Date -eq "$MyDate"
+            $HTMLReportGroups = $MyReportsGroups | Where-Object Date -eq "$MyDate"
+  
+            New-HTMLContent -HeaderText 'Informations' -HeaderTextSize 22 -HeaderTextColor $HeaderColor1 -HeaderTextAlignment center -HeaderBackGroundColor $HeaderColor2 {
+  
+                New-HTMLFontIcon -IconSolid address-book
+                New-HTMLHeading h2 -HeadingText "$($AuditorCompany.ToUpper())"
+                New-HTMLFontIcon -IconSolid address-card 
+                New-HTMLText -Text "$ConsultantName"
+                New-HTMLFontIcon -IconSolid phone
+                New-HTMLText -Text "$ConsultantPhone"
+                New-HTMLFontIcon -IconSolid envelope
+                New-HTMLText -Text "$ConsultantMail"
+            
+            }
+  
+            New-HTMLContent -HeaderText 'Baselines Recommendations' -HeaderTextSize 22 -HeaderTextColor $HeaderColor1 -HeaderTextAlignment center -HeaderBackGroundColor $Or {
+  
+              $DataReport = $MyReportsDetails | Where-Object Date -EQ $MyDate 
+              $MyCols = @("ControlID","Requirement","Criticality","Category","Model")
+              New-HTMLTable -Title "Indicators Found" -DataTable ($DataReport | Sort-Object Score) -IncludeProperty $MyCols -HideFooter -HideButtons -DisablePaging {
+                  <#
+                  $LevelColors | ForEach-Object {
+                      $MyLevelIndex = $LevelColors.IndexOf("$($_)")
+                      New-HTMLTableCondition -Name "Level" -ComparisonType string -Operator eq -Value "$($MyLevelIndex)" -BackgroundColor $LevelColors[$($MyLevelIndex)] -Row
+                  }
+                      #>
+                  #New-HTMLTableCondition -Name "Score" -ComparisonType string -Operator eq -Value $MaxScore -Color Green -Row
+                  
+              }
+            }
+        }
+  
     }
-
 
 } -FilePath "$HTMLReportFile"
 
